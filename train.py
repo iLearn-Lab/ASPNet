@@ -10,8 +10,8 @@ import torch.optim as optim
 from sklearn.metrics import accuracy_score, f1_score, recall_score
 
 import config
-from sapnet.losses import MaskedCELoss, MaskedMSELoss
-from sapnet.utils import Logger, build_model, create_loaders, generate_inputs, generate_mask, seed_everything
+from aspnet.losses import MaskedCELoss, MaskedMSELoss
+from aspnet.utils import Logger, build_model, create_loaders, generate_inputs, generate_mask, seed_everything
 
 
 REGRESSION = "regression"
@@ -246,7 +246,7 @@ def resolve_prompt_root(args):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Train SAPNet for incomplete multimodal learning.")
+    parser = argparse.ArgumentParser(description="Train ASPNet for incomplete multimodal learning.")
     parser.add_argument("--dataset", default="CMU-MOSI", help="CMU-MOSI, CMU-MOSEI, or IEMOCAP.")
     parser.add_argument("--iemocap-classes", type=int, choices=[4, 6], default=4)
     parser.add_argument("--audio-feature", default="wav2vec-large-c-UTT")

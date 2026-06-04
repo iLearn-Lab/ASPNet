@@ -2,13 +2,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from sapnet.modules.attention import *
+from aspnet.modules.attention import *
 
 
-class PromptFusionNetwork(nn.Module):
+class ASPNet(nn.Module):
 
     def __init__(self, args, adim, tdim, vdim, D_e, n_classes, pdim=0, depth=4, num_heads=4, mlp_ratio=1, drop_rate=0, attn_drop_rate=0, no_cuda=False):
-        super(PromptFusionNetwork, self).__init__()
+        super(ASPNet, self).__init__()
         self.n_classes = n_classes
         self.D_e = D_e
         self.num_heads = num_heads
@@ -160,3 +160,6 @@ class PromptFusionNetwork(nn.Module):
         out = self.nlp_head(hidden)
 
         return hidden, out, out_a, out_t, out_v, np.array(weight_save)
+
+
+PromptFusionNetwork = ASPNet

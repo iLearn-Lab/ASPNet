@@ -1,12 +1,12 @@
-# SAPNet
+# ASPNet
 
-This repository contains the code for **SAPNet: Semantic-Affective Prompting with MLLMs for Incomplete Multimodal Learning**. It includes semantic-affective prompt generation, prompt feature extraction, and two-stage model training.
+This repository contains the code for **ASPNet: Affective Semantic Prompting Network with MLLMs for Incomplete Multimodal Learning**. It includes affective semantic prompt generation, prompt feature extraction, and two-stage model training.
 
 ## Supported Datasets
 
 - CMU-MOSI
 - CMU-MOSEI
-- IEMOCAP, four-class or six-class labels
+- IEMOCAP
 
 The default dataset layout is:
 
@@ -102,7 +102,7 @@ python -u prompts/extract_features.py \
 ## Repository Structure
 
 ```text
-sapnet/
+aspnet/
   datasets.py
   losses.py
   model.py

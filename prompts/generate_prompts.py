@@ -16,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import config
-from sapnet.modalities import CONDITION_TO_MODALITIES, normalize_condition
+from aspnet.modalities import CONDITION_TO_MODALITIES, normalize_condition
 
 
 ALL_MODALITIES: Tuple[str, ...] = ("text", "audio", "visual")

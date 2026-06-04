@@ -15,7 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import config
-from sapnet.modalities import normalize_condition
+from aspnet.modalities import normalize_condition
 
 
 PROMPT_FILE_NAMES = {

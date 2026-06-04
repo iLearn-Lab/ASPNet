@@ -10,8 +10,8 @@ from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 
 import config
-from sapnet.datasets import CmuStyleDataset, IemocapDataset
-from sapnet.model import PromptFusionNetwork
+from aspnet.datasets import CmuStyleDataset, IemocapDataset
+from aspnet.model import ASPNet
 
 
 class Logger:
@@ -127,7 +127,7 @@ def _loader(dataset, indices, batch_size, num_workers):
 
 
 def build_model(args, adim: int, tdim: int, vdim: int, pdim: int = 0):
-    model = PromptFusionNetwork(
+    model = ASPNet(
         args,
         adim,
         tdim,
