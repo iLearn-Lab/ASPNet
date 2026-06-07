@@ -1,6 +1,6 @@
 <a id="top"></a>
 <div align="center">
-  <img src="./assets/logo.svg" width="600">,
+  <img src="./assets/logo.svg" width="600">
   <h1>ASPNet: Bridging Low-Level Observation and High-Level Affective Prior for Incomplete Multimodal Learning</h1>
   <div>
     <a target="_blank" href="https://peacelwh.github.io">Wenhao&#160;Li</a><sup>1,2</sup>,
