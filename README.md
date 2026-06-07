@@ -6,14 +6,13 @@
     <a target="_blank" href="#">Wenhao&#160;Li</a><sup>1,2</sup>,
     <a target="_blank" href="#">Zhibin&#160;Wu</a><sup>1</sup>,
     <a target="_blank" href="#">Qiangchang&#160;Wang</a><sup>1</sup>,
-    <a target="_blank" href="#">Pu&#160;Wang</a><sup>2,3</sup>,
+    <a target="_blank" href="#">Pu&#160;Wang</a><sup>1,2</sup>,
     <a target="_blank" href="#">Yilong&#160;Yin</a><sup>1</sup>,
-    <a target="_blank" href="https://liqiangnie.github.io">Liqiang&#160;Nie</a><sup>4</sup>
+    <a target="_blank" href="https://liqiangnie.github.io">Liqiang&#160;Nie</a><sup>3</sup>
   </div>
-  <sup>1</sup>School of Software, Shandong University &#160;&#160;&#160;<br>
+  <sup>1</sup>Shandong University &#160;&#160;&#160;<br>
   <sup>2</sup>Shenzhen Loop Area Institute &#160;&#160;&#160;<br>
-  <sup>3</sup>School of Mathematics, Shandong University &#160;&#160;&#160;<br>
-  <sup>4</sup>School of Computer Science and Technology, Harbin Institute of Technology (Shenzhen) &#160;&#160;&#160;<br>
+  <sup>3</sup>Harbin Institute of Technology (Shenzhen) &#160;&#160;&#160;<br>
   <br />
   <p>
     <a href=""><img src="https://img.shields.io/badge/Paper-Coming.Soon-blue.svg?style=flat-square" alt="Paper"></a>
@@ -79,12 +78,12 @@ ASPNet is evaluated on CMU-MOSI, CMU-MOSEI, and IEMOCAP under a fixed missing-mo
 
 > 📌 *Result tables/figures will be added here.*
 
-<!--
+
 <div align="center">
   <img src="assets/results-incomplete.png" alt="Incomplete-modality results" width="900">
   <img src="assets/results-complete.png" alt="Complete-modality results" width="900">
 </div>
--->
+
 
 [⬆ Back to top](#top)
 
