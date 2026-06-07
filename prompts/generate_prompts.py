@@ -91,6 +91,7 @@ STAGE_KEYS = {
     "INFERENCE": "inference",
     "PROMPT": "prompt",
 }
+STAGE_END_TAGS = {stage: f"</{stage}>" for stage in STAGES}
 
 
 @dataclass
@@ -294,11 +295,28 @@ def build_stage_prompt(
 
 
 def parse_stage_response(raw_text: str, stage: str) -> str:
+    raw_text = trim_after_stage(raw_text, stage)
     sections = extract_tagged_sections(raw_text)
     key = STAGE_KEYS[stage]
     if sections.get(key):
         return sections[key].strip()
     return raw_text.strip().replace("\n", " ")
+
+
+def trim_after_stage(raw_text: str, stage: str) -> str:
+    end_tag = STAGE_END_TAGS[stage]
+    match = re.search(re.escape(end_tag), raw_text, flags=re.IGNORECASE)
+    if not match:
+        return raw_text
+    return raw_text[: match.end()]
+
+
+def is_valid_stage_section(section: str, stage: str) -> bool:
+    if not section or not section.strip():
+        return False
+    if f"<{stage}>" in section.upper() or f"</{stage}>" in section.upper():
+        return False
+    return True
 
 
 def build_judge_prompt(candidates: Sequence[str], available: Sequence[str], missing: Sequence[str]) -> str:
@@ -325,12 +343,16 @@ class OmniPromptGenerator:
         max_new_tokens: int = 512,
         disable_talker: bool = True,
         use_flash_attention_2: bool = False,
+        candidate_temperature: float = 0.7,
+        candidate_top_p: float = 0.9,
     ) -> None:
         import torch
         from transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcessor
 
         self.torch = torch
         self.max_new_tokens = max_new_tokens
+        self.candidate_temperature = candidate_temperature
+        self.candidate_top_p = candidate_top_p
         model_kwargs: Dict[str, Any] = {
             "torch_dtype": "auto",
             "device_map": "auto",
@@ -344,7 +366,13 @@ class OmniPromptGenerator:
         if disable_talker and hasattr(self.model, "disable_talker"):
             self.model.disable_talker()
 
-    def _generate(self, prompt: str, media: MediaPackage, max_new_tokens: Optional[int] = None) -> str:
+    def _generate(
+        self,
+        prompt: str,
+        media: MediaPackage,
+        max_new_tokens: Optional[int] = None,
+        do_sample: bool = False,
+    ) -> str:
         content = list(media.content_items)
         content.append({"type": "text", "text": prompt})
         messages = [
@@ -374,12 +402,22 @@ class OmniPromptGenerator:
 
         inputs = inputs.to(self.model.device).to(self.model.dtype)
         with self.torch.no_grad():
+            generation_kwargs: Dict[str, Any] = {
+                "use_audio_in_video": media.use_audio_in_video,
+                "thinker_max_new_tokens": max_new_tokens or self.max_new_tokens,
+                "do_sample": do_sample,
+                "return_audio": False,
+            }
+            if do_sample:
+                generation_kwargs.update(
+                    {
+                        "temperature": self.candidate_temperature,
+                        "top_p": self.candidate_top_p,
+                    }
+                )
             output_ids = self.model.generate(
                 **inputs,
-                use_audio_in_video=media.use_audio_in_video,
-                thinker_max_new_tokens=max_new_tokens or self.max_new_tokens,
-                do_sample=False,
-                return_audio=False,
+                **generation_kwargs,
             )
         if isinstance(output_ids, (tuple, list)):
             output_ids = output_ids[0]
@@ -390,8 +428,8 @@ class OmniPromptGenerator:
             clean_up_tokenization_spaces=False,
         )[0].strip()
 
-    def generate_section(self, prompt: str, media: MediaPackage) -> str:
-        return self._generate(prompt, media, max_new_tokens=self.max_new_tokens)
+    def generate_section(self, prompt: str, media: MediaPackage, do_sample: bool = False) -> str:
+        return self._generate(prompt, media, max_new_tokens=self.max_new_tokens, do_sample=do_sample)
 
     def choose_candidate(self, judge_prompt: str) -> str:
         return self._generate(judge_prompt, MediaPackage([], False, "text_only", []), max_new_tokens=16)
@@ -412,6 +450,15 @@ def load_done_sample_ids(path: str) -> Set[str]:
     return done
 
 
+def append_error(path: str, item: Mapping[str, Any]) -> None:
+    if not path:
+        return
+    error_parent = os.path.dirname(os.path.abspath(path))
+    os.makedirs(error_parent, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(dict(item), ensure_ascii=False) + "\n")
+
+
 def generate_staged_prompt(
     generator: OmniPromptGenerator,
     sample: Mapping[str, Any],
@@ -419,19 +466,33 @@ def generate_staged_prompt(
     media: MediaPackage,
     num_candidates: int,
     candidate_stage: str,
+    max_retries: int,
 ) -> Tuple[Dict[str, str], Dict[str, Any]]:
     sections: Dict[str, str] = {}
-    diagnostics: Dict[str, Any] = {"candidate_stage": candidate_stage, "num_candidates": num_candidates}
+    diagnostics: Dict[str, Any] = {
+        "candidate_stage": candidate_stage,
+        "num_candidates": num_candidates,
+        "max_retries": max_retries,
+        "media_access_mode": media.access_mode,
+        "media_source_paths": media.source_paths,
+    }
     available = list(CONDITION_TO_MODALITIES[condition])
     missing = [modality for modality in ALL_MODALITIES if modality not in available]
 
     for stage in STAGES:
         stage_prompt = build_stage_prompt(sample, condition, media, stage, sections)
         if stage == candidate_stage and num_candidates > 1:
-            candidates = [
-                parse_stage_response(generator.generate_section(stage_prompt, media), stage)
-                for _ in range(num_candidates)
-            ]
+            candidates = []
+            candidate_attempts = num_candidates + max(0, max_retries)
+            for attempt in range(candidate_attempts):
+                raw_response = generator.generate_section(stage_prompt, media, do_sample=attempt > 0)
+                candidate = parse_stage_response(raw_response, stage)
+                if is_valid_stage_section(candidate, stage):
+                    candidates.append(candidate)
+                if len(candidates) >= num_candidates:
+                    break
+            if not candidates:
+                raise RuntimeError(f"Failed to generate a valid {stage} section for sample {sample['sample_id']}")
             judge_prompt = build_judge_prompt(candidates, available, missing)
             judge_response = generator.choose_candidate(judge_prompt)
             best_index = parse_judge_index(judge_response, len(candidates))
@@ -440,8 +501,18 @@ def generate_staged_prompt(
             diagnostics["judge_response"] = judge_response
             diagnostics["selected_index"] = best_index
         else:
-            raw_response = generator.generate_section(stage_prompt, media)
-            sections[STAGE_KEYS[stage]] = parse_stage_response(raw_response, stage)
+            section = ""
+            raw_response = ""
+            for attempt in range(max(1, max_retries + 1)):
+                raw_response = generator.generate_section(stage_prompt, media, do_sample=attempt > 0)
+                section = parse_stage_response(raw_response, stage)
+                if is_valid_stage_section(section, stage):
+                    break
+            if not is_valid_stage_section(section, stage):
+                raise RuntimeError(
+                    f"Failed to generate a valid {stage} section for sample {sample['sample_id']}: {raw_response[:200]}"
+                )
+            sections[STAGE_KEYS[stage]] = section
 
     sections["final_answer"] = sections.get("prompt", "")
     return sections, diagnostics
@@ -460,6 +531,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--num-candidates", type=int, default=1)
     parser.add_argument("--candidate-stage", choices=STAGES, default="PROMPT")
+    parser.add_argument("--candidate-temperature", type=float, default=0.7)
+    parser.add_argument("--candidate-top-p", type=float, default=0.9)
+    parser.add_argument("--max-retries", type=int, default=1)
     parser.add_argument("--fps", type=float, default=2.0)
     parser.add_argument("--max-frames", type=int, default=16)
     parser.add_argument("--use-flash-attention-2", action="store_true")
@@ -468,6 +542,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--save-generation-input", action="store_true")
+    parser.add_argument("--skip-errors", action="store_true")
+    parser.add_argument("--error-path", default="")
     return parser
 
 
@@ -490,6 +566,8 @@ def main() -> None:
         max_new_tokens=args.max_new_tokens,
         disable_talker=not args.keep_talker,
         use_flash_attention_2=args.use_flash_attention_2,
+        candidate_temperature=args.candidate_temperature,
+        candidate_top_p=args.candidate_top_p,
     )
 
     mode = "a" if args.resume else "w"
@@ -503,23 +581,40 @@ def main() -> None:
             if not started or sample_id in done:
                 continue
 
-            media = prepare_media_package(
-                sample=sample,
-                condition=condition,
-                raw_data_dir=args.raw_data_dir,
-                audio_cache_dir=audio_cache_dir,
-                fps=args.fps,
-                max_frames=args.max_frames,
-            )
+            try:
+                media = prepare_media_package(
+                    sample=sample,
+                    condition=condition,
+                    raw_data_dir=args.raw_data_dir,
+                    audio_cache_dir=audio_cache_dir,
+                    fps=args.fps,
+                    max_frames=args.max_frames,
+                )
 
-            sections, diagnostics = generate_staged_prompt(
-                generator=generator,
-                sample=sample,
-                condition=condition,
-                media=media,
-                num_candidates=max(1, args.num_candidates),
-                candidate_stage=args.candidate_stage,
-            )
+                sections, diagnostics = generate_staged_prompt(
+                    generator=generator,
+                    sample=sample,
+                    condition=condition,
+                    media=media,
+                    num_candidates=max(1, args.num_candidates),
+                    candidate_stage=args.candidate_stage,
+                    max_retries=max(0, args.max_retries),
+                )
+            except Exception as exc:
+                if not args.skip_errors:
+                    raise
+                append_error(
+                    args.error_path or f"{args.output_path}.errors",
+                    {
+                        "sample_id": sample_id,
+                        "dataset": args.dataset,
+                        "split": args.split,
+                        "condition": condition,
+                        "error_type": type(exc).__name__,
+                        "error": str(exc),
+                    },
+                )
+                continue
 
             item: Dict[str, Any] = {
                 "sample_id": sample_id,
