@@ -78,47 +78,26 @@ ASPNet is evaluated on CMU-MOSI, CMU-MOSEI, and IEMOCAP under a fixed missing-mo
 
 
 
----
-
-## 📑 Table of Contents
-
-- [📌 Introduction](#-introduction)
-- [📢 News](#-news)
-- [✨ Key Features](#-key-features)
-- [🏗️ Architecture](#️-architecture)
-- [📊 Experiment Results](#-experiment-results)
-- [📂 Repository Structure](#-repository-structure)
-- [🚀 Installation](#-installation)
-- [📂 Data Preparation](#-data-preparation)
-- [🏃‍♂️ Quick Start](#️-quick-start)
-  - [1. Prompt Generation](#1-prompt-generation)
-  - [2. Prompt Feature Extraction](#2-prompt-feature-extraction)
-  - [3. Training](#3-training)
-- [🤝 Acknowledgements](#-acknowledgements)
-- [✉️ Contact](#️-contact)
-- [📝 Citation](#-citation)
-
----
 
 ## 📂 Repository Structure
 
 ```text
 ASPNet/
 ├── aspnet/
-│   ├── datasets.py          # 📚 Dataset loader and preprocessing
-│   ├── losses.py            # 📉 Task and alignment losses
-│   ├── model.py             # 🧠 ASPNet model architecture and forward pass
-│   ├── modalities.py        # 🎛️ Modality-availability handling
-│   ├── utils.py             # 🛠️ Utility functions
+│   ├── datasets.py          #  Dataset loader and preprocessing
+│   ├── losses.py            #  Task and alignment losses
+│   ├── model.py             #  ASPNet model architecture and forward pass
+│   ├── modalities.py        #  Modality-availability handling
+│   ├── utils.py             #  Utility functions
 │   └── modules/
-│       └── attention.py     # 🔗 Token-level / channel-level interaction modules
+│       └── attention.py     #  Token-level / channel-level interaction modules
 ├── prompts/
-│   ├── generate_prompts.py  # 🪜 MLLM-driven staged prompt generation
-│   └── extract_features.py  # 🔢 Encode prompts into .npy feature files
-├── scripts/                 # 📜 Example shell scripts for common runs
-├── config.py                # ⚙️ Dataset paths and configuration
-├── train.py                 # 🚀 Training / evaluation entry point
-└── README.md                # 📝 Documentation
+│   ├── generate_prompts.py  #  MLLM-driven staged prompt generation
+│   └── extract_features.py  #  Encode prompts into .npy feature files
+├── scripts/                 #  Example shell scripts for common runs
+├── config.py                #  Dataset paths and configuration
+├── train.py                 #  Training / evaluation entry point
+└── README.md                #  Documentation
 ```
 
 [⬆ Back to top](#top)
