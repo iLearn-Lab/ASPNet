@@ -3,11 +3,11 @@
   <img src="./assets/logo.svg" width="600">,
   <h1>ASPNet: Bridging Low-Level Observation and High-Level Affective Prior for Incomplete Multimodal Learning</h1>
   <div>
-    <a target="_blank" href="#">Wenhao&#160;Li</a><sup>1,2</sup>,
+    <a target="_blank" href="https://peacelwh.github.io">Wenhao&#160;Li</a><sup>1,2</sup>,
     <a target="_blank" href="#">Zhibin&#160;Wu</a><sup>1</sup>,
-    <a target="_blank" href="#">Qiangchang&#160;Wang</a><sup>1</sup>,
+    <a target="_blank" href="https://faculty.sdu.edu.cn/~u6fuaq/zh_CN/index.htm">Qiangchang&#160;Wang</a><sup>1</sup>,
     <a target="_blank" href="#">Pu&#160;Wang</a><sup>1,2</sup>,
-    <a target="_blank" href="#">Yilong&#160;Yin</a><sup>1</sup>,
+    <a target="_blank" href="https://faculty.sdu.edu.cn/ylyin/">Yilong&#160;Yin</a><sup>1</sup>,
     <a target="_blank" href="https://liqiangnie.github.io">Liqiang&#160;Nie</a><sup>3</sup>
   </div>
   <sup>1</sup>Shandong University &#160;&#160;&#160;<br>
@@ -18,8 +18,8 @@
     <a href=""><img src="https://img.shields.io/badge/Paper-Coming.Soon-blue.svg?style=flat-square" alt="Paper"></a>
     <a href=""><img alt='arXiv' src="https://img.shields.io/badge/arXiv-Coming.Soon-b31b1b.svg"></a>
     <a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white"></a>
-    <img src="https://img.shields.io/badge/python-3.8+-blue?style=flat-square" alt="Python">
-    <a href="https://github.com/iLearn-Lab/ASPNet"><img alt='stars' src="https://img.shields.io/github/stars/iLearn-Lab/ASPNet?style=social"></a>
+    <img src="https://img.shields.io/badge/python-3.10+-blue?style=flat-square" alt="Python">
+    <a href="https://github.com/iLearn-Lab/ASPNet"><img alt='stars' src="https://img.shields.io/badge/Star-GitHub-181717?style=social&logo=github"></a>
   </p>
   <p>
     <b>Official Implementation:</b> An affective semantic prompting framework that uses a frozen Multimodal Large Language Model (MLLM) as an offline semantic generator, bridging low-level observation and high-level affective prior for robust incomplete multimodal learning.
@@ -39,13 +39,6 @@ In real-world deployments, modalities are frequently unavailable, corrupted, or 
 </p>
 </div>
 
-[⬆ Back to top](#top)
-
-## 📢 News
-* **[YYYY-MM-DD]** 🚀 We officially release the code and framework of ASPNet!
-* **[YYYY-MM-DD]** 🎉 ASPNet has been accepted by **<venue>**!
-
-[⬆ Back to top](#top)
 
 ## ✨ Key Features
 ASPNet introduces an MLLM-driven prompting pipeline and a lightweight alignment network to complement low-level features with high-level affective priors:
@@ -56,7 +49,6 @@ ASPNet introduces an MLLM-driven prompting pipeline and a lightweight alignment 
 * 🔗 **Semantic Alignment Network**: Injects prompts at two complementary granularities — token-level interaction (TI) via self-attention and channel-level interaction (CI) via channel-wise modulation — with an adaptive gated residual fusion to inject semantics selectively.
 * 🏆 **State-of-the-Art Robustness**: Strong improvements under severely incomplete conditions (e.g., audio- or visual-only) while remaining competitive under the complete-modality setting.
 
-[⬆ Back to top](#top)
 
 ## 🏗️ Architecture
 
@@ -70,7 +62,7 @@ ASPNet introduces an MLLM-driven prompting pipeline and a lightweight alignment 
   <figcaption><strong>Figure 3.</strong> An example of the four-stage structured prompting generation process (STATE → EVIDENCE → INFERENCE → PROMPT).</figcaption>
 </p>
 
-[⬆ Back to top](#top)
+
 
 ## 📊 Experiment Results
 
@@ -85,7 +77,6 @@ ASPNet is evaluated on CMU-MOSI, CMU-MOSEI, and IEMOCAP under a fixed missing-mo
 </div>
 
 
-[⬆ Back to top](#top)
 
 ---
 
@@ -151,7 +142,6 @@ pip install torch torchvision torchaudio
 pip install -r requirements.txt
 ```
 
-[⬆ Back to top](#top)
 
 ## 📂 Data Preparation
 
@@ -171,7 +161,6 @@ Dataset paths can be adjusted in `config.py`.
 - **Visual**: MTCNN face alignment + pre-trained `MA-Net` → 1024-dim utterance-level features.
 - **Textual**: pre-trained `DeBERTa-large` → 1024-dim utterance-level features.
 
-[⬆ Back to top](#top)
 
 ## 🏃‍♂️ Quick Start
 
@@ -251,20 +240,11 @@ python -u train.py \
 
 Example shell scripts for common runs are provided under `scripts/`.
 
-[⬆ Back to top](#top)
 
-## 🤝 Acknowledgements
-
-This project builds upon recent advances in incomplete multimodal learning and affective computing, and on the prompting capabilities of Multimodal Large Language Models. We thank the open-source community, and the authors of the datasets and pre-trained feature extractors used in this work.
-
-[⬆ Back to top](#top)
 
 ## ✉️ Contact
 
 If you have any questions, feel free to [open an issue](https://github.com/iLearn-Lab/ASPNet/issues) or reach out to the corresponding authors.
-
-[⬆ Back to top](#top)
-
 
 
 [⬆ Back to top](#top)
